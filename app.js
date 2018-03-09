@@ -22,6 +22,7 @@ let favoriteCount = [];
 let friendName = [];
 let friendHandle = [];
 let friendAvatar = [];
+let friendStatus = [];
 
 
 app.set('view engine', 'pug');
@@ -55,11 +56,13 @@ app.use((req, res, next) => {
 		if(err) {
 			console.log(err.message);
 		} else {
-			console.log(data);
-			data.forEach(user => {
+			const { users } = data;
+			console.log(users);
+			users.forEach(user => {
 				friendName.push(user.name);
 				friendHandle.push(user.screen_name);
 				friendAvatar.push(user.profile_image_url);
+				friendStatus.push(user.following);
 			});
 		}
 	});
@@ -78,7 +81,8 @@ app.get('/', (req, res) => {
 		favoriteCount: favoriteCount,
 		friendName: friendName,
 		friendHandle: friendHandle,
-		friendAvatar: friendAvatar
+		friendAvatar: friendAvatar,
+		friendStatus: friendStatus
 	});
 });
 

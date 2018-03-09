@@ -9,44 +9,59 @@
                   h4 #{friendName[0]}
                   p #{friendHandle[0]}
               .circle--fluid--cell
-                a.button.button-text Unfollow
+                if `${friendStatus[0]}`
+                  a.button.button-text Unfollow
+                else 
+                  a.button Follow
           li
             .circle--fluid
               .circle--fluid--cell.circle--fluid--primary
                 a.app--tweet--author
-                  .app--avatar(style='background-image: url(images/f-spore.png)')
+                  .app--avatar(style=`background-image: url(${friendAvatar[1]})`)
                     img(src='images/f-spore.png')
-                  h4 Jill Spore
-                  p @jillspore
+                  h4 #{friendName[1]}
+                  p #{friendHandle[1]}
               .circle--fluid--cell
-                a.button.button-text Unfollow
+                if `${friendStatus[1]}`
+                  a.button.button-text Unfollow
+                else 
+                  a.button Follow
           li
             .circle--fluid
               .circle--fluid--cell.circle--fluid--primary
                 a.app--tweet--author
-                  .app--avatar(style='background-image: url(images/f-spore.png)')
+                  .app--avatar(style=`background-image: url(${friendAvatar[2]})`)
                     img(src='images/f-spore.png')
-                  h4 Jill Spore
-                  p @jillspore
+                  h4 #{friendName[2]}
+                  p #{friendHandle[2]}
               .circle--fluid--cell
-                a.button.button-text Unfollow
+                if `${friendStatus[2]}`
+                  a.button.button-text Unfollow
+                else 
+                  a.button Follow
           li
             .circle--fluid
               .circle--fluid--cell.circle--fluid--primary
                 a.app--tweet--author
-                  .app--avatar(style='background-image: url(images/f-spore.png)')
+                  .app--avatar(style=`background-image: url(${friendAvatar[3]})`)
                     img(src='images/f-spore.png')
-                  h4 Jill Spore
-                  p @jillspore
+                  h4 #{friendName[3]}
+                  p #{friendHandle[3]}
               .circle--fluid--cell
-                a.button Follow
+                if `${friendStatus[3]}`
+                  a.button.button-text Unfollow
+                else 
+                  a.button Follow
           li
             .circle--fluid
               .circle--fluid--cell.circle--fluid--primary
                 a.app--tweet--author
-                  .app--avatar(style='background-image: url(images/f-spore.png)')
+                  .app--avatar(style=`background-image: url(${friendAvatar[4]})`)
                     img(src='images/f-spore.png')
-                  h4 Jill Spore
-                  p @jillspore
+                  h4 #{friendName[4]}
+                  p #{friendHandle[4]}
               .circle--fluid--cell
-                a.button.button-text Unfollow
+                if `${friendStatus[4]}`
+                  a.button.button-text Unfollow
+                else 
+                  a.button Follow
