@@ -12,7 +12,9 @@ const T = new Twit(config);
 //==========================
 //		GLOBAL VARIABLES
 //==========================
-
+let currentUser;
+let userAvatar;
+let userFollowing;
 let text = [];
 let tweeterName = [];
 let tweeterScreenName = [];
@@ -23,7 +25,10 @@ let friendName = [];
 let friendHandle = [];
 let friendAvatar = [];
 let friendStatus = [];
-
+let reciever;
+let senderAvatar;
+let recieverAvatar;
+let message = [];
 
 app.set('view engine', 'pug');
 
@@ -57,7 +62,6 @@ app.use((req, res, next) => {
 			console.log(err.message);
 		} else {
 			const { users } = data;
-			console.log(users);
 			users.forEach(user => {
 				friendName.push(user.name);
 				friendHandle.push(user.screen_name);
@@ -66,13 +70,42 @@ app.use((req, res, next) => {
 			});
 		}
 	});
-	console.log(friendName);
+	next();
+}, (req, res, next) => {
+	//Get 5 most recent DMs
+	T.get('direct_messages/sent', { count: 1 }, (err, data, res) => {
+		if(err) {
+			console.log(err.message);
+		} else {
+			reciever = data[0].recipient.name;
+			recieverAvatar = data[0].recipient.profile_image_url;
+			senderAvatar = data[0].sender.profile_image_url;
+
+			data.forEach(msg => {
+				message.push(msg.text);
+			});
+		}
+	});
+	next();
+}, (req, res, next) => {
+	//Get current user's info
+	T.get('account/verify_credentials', (err, data, res) => {
+		if(err) {
+			console.log(err.message);
+		}
+		currentUser = data.screen_name;
+		userAvatar = data.profile_image_url;
+		userFollowing = data.friends_count;
+	});
 	next();
 });
 
 //Create local variables to insert into templates
 app.get('/', (req, res) => {
 	res.render('index', {
+		currentUser: currentUser,
+		userAvatar: userAvatar,
+		userFollowing: userFollowing,
 		text: text,
 		tweeterName: tweeterName,
 		tweeterScreenName: tweeterScreenName,
@@ -82,7 +115,11 @@ app.get('/', (req, res) => {
 		friendName: friendName,
 		friendHandle: friendHandle,
 		friendAvatar: friendAvatar,
-		friendStatus: friendStatus
+		friendStatus: friendStatus,
+		reciever: reciever,
+		recieverAvatar: recieverAvatar,
+		senderAvatar: senderAvatar,
+		message: message
 	});
 });
 
