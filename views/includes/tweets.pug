@@ -1,10 +1,9 @@
 .app--section
         ul.app--tweet--list
           li
-            strong.app--tweet--timestamp 4h
+            strong.app--tweet--timestamp #{tweetTime[0]}
             a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweeterProfileImage[0]})`)
-                img(src='images/f-spore.png')
               h4 #{tweeterName[0]}
               |  #{tweeterScreenName[0]}
             p= text[0]
@@ -35,10 +34,9 @@
                     C35,4.1,30.9,0,25.8,0L25.8,0z')
                   strong= favoriteCount[0]
           li
-            strong.app--tweet--timestamp 4h
+            strong.app--tweet--timestamp #{tweetTime[1]}
             a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweeterProfileImage[1]})`)
-                img(src='images/f-spore.png')
               h4 #{tweeterName[1]}
               |  #{tweeterScreenName[1]}
             p= text[1]
@@ -69,10 +67,9 @@
                     C35,4.1,30.9,0,25.8,0L25.8,0z')
                   strong= favoriteCount[1]
           li
-            strong.app--tweet--timestamp 4h
+            strong.app--tweet--timestamp #{tweetTime[2]}
             a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweeterProfileImage[2]})`)
-                img(src='images/f-spore.png')
               h4 #{tweeterName[2]}
               |  #{tweeterScreenName[2]}
             p= text[2]
@@ -103,10 +100,9 @@
                     C35,4.1,30.9,0,25.8,0L25.8,0z')
                   strong= favoriteCount[2]
           li
-            strong.app--tweet--timestamp 4h
+            strong.app--tweet--timestamp #{tweetTime[3]}
             a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweeterProfileImage[3]})`)
-                img(src='images/f-spore.png')
               h4 #{tweeterName[3]}
               |  #{tweeterScreenName[3]}
             p= text[3]
@@ -137,10 +133,9 @@
                     C35,4.1,30.9,0,25.8,0L25.8,0z')
                   strong= favoriteCount[3]            
           li
-            strong.app--tweet--timestamp 4h
+            strong.app--tweet--timestamp #{tweetTime[4]}
             a.app--tweet--author
               .app--avatar(style=`background-image: url(${tweeterProfileImage[4]})`)
-                img(src='images/f-spore.png')
               h4 #{tweeterName[4]}
               |  #{tweeterScreenName[4]}
             p= text[4]

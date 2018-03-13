@@ -7,26 +7,21 @@
             ul.app--message--conversation
               li.app--message
                 .app--avatar(style=`background-image: url(${senderAvatar})`)
-                  img(src='images/f-spore.png')
-                p.app--message--text #{message[0]}
-                p.app--message--timestamp 3 hours ago
+                p.app--message--text #{sentMessage[3]}
+                p.app--message--timestamp #{sentMsgTime[3]}
               li.app--message--me
                 .app--avatar(style=`background-image: url(${recieverAvatar})`)
-                  img(src='images/m-spore.png')
-                p.app--message--text #{message[1]}
-                p.app--message--timestamp 2 hours ago
+                p.app--message--text #{recMessage[2]}
+                p.app--message--timestamp #{recMsgTime[2]}
               li.app--message
                 .app--avatar(style=`background-image: url(${senderAvatar})`)
-                  img(src='images/f-spore.png')
-                p.app--message--text #{message[2]}
-                p.app--message--timestamp 2 hours ago
+                p.app--message--text #{sentMessage[2]}
+                p.app--message--timestamp #{sentMsgTime[2]}
               li.app--message--me
                 .app--avatar(style=`background-image: url(${recieverAvatar})`)
-                  img(src='images/m-spore.png')
-                p.app--message--text #{message[3]}
-                p.app--message--timestamp 1 hour ago
+                p.app--message--text #{recMessage[1]}
+                p.app--message--timestamp #{recMsgTime[2]}
               li.app--message
                 .app--avatar(style=`background-image: url(${senderAvatar})`)
-                  img(src='images/f-spore.png')
-                p.app--message--text #{message[4]}
-                p.app--message--timestamp 1 hour ago
+                p.app--message--text #{sentMessage[1]}
+                p.app--message--timestamp #{sentMsgTime[1]}
