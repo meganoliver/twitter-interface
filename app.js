@@ -7,16 +7,13 @@ const pug = require('pug');
 const Twit = require('twit');
 const config = require('./config.js');
 const bodyParser = require('body-parser');
-const cookieParser = require('cookie-parser');
-const http = require('http');
+
 
 const app = express();
 const T = new Twit(config);
-const server = http.createServer(app);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
 app.set('view engine', 'pug');
 
 //==========================
@@ -77,33 +74,36 @@ function elapsedTime(previous) {
 // 		MIDDLEWARE
 //==========================
 
+//Add static files
 app.use('/static', express.static('public'));
 
 //Pull data from the Twitter API 
 app.use((req, res, next) => {
 	//Get 5 latest tweets
-	T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
-		if(err) {
-			console.log(err.message);
-		} else {
-			data.forEach(tweet => {
-				time = tweet.created_at;
-				tweetTime.push(elapsedTime(time));
-				text.push(tweet.text);
-				tweeterName.push(tweet.user.name);
-				tweeterScreenName.push(tweet.user.screen_name);
-				tweeterProfileImage.push(tweet.user.profile_image_url);
-				retweetCount.push(tweet.retweet_count);
-				favoriteCount.push(tweet.favorite_count);
-			});
-		}	
-	});
+		T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
+			if(err) {
+				const err = new Error('Whoops! Something went wrong!');
+				err.status = 500;
+			} else {
+				data.forEach(tweet => {
+					time = tweet.created_at;
+					tweetTime.push(elapsedTime(time));
+					text.push(tweet.text);
+					tweeterName.push(tweet.user.name);
+					tweeterScreenName.push(tweet.user.screen_name);
+					tweeterProfileImage.push(tweet.user.profile_image_url);
+					retweetCount.push(tweet.retweet_count);
+					favoriteCount.push(tweet.favorite_count);
+				})
+			}
+		});	
 	next();
 }, (req, res, next) => {
 	//Get 5 most recent friends
 	T.get('friends/list', { count: 5 }, (err, data, res) => {
 		if(err) {
-			console.log(err.message);
+			const err = new Error('Whoops! Something went wrong!');
+			err.status = 500;
 		} else {
 			const { users } = data;
 			users.forEach(user => {
@@ -119,7 +119,8 @@ app.use((req, res, next) => {
 	//Get 3 most recent sent DMs
 	T.get('direct_messages/sent', { count: 3 }, (err, data, res) => {
 		if(err) {
-			console.log(err.message);
+			const err = new Error('Whoops! Something went wrong!');
+			err.status = 500;
 		} else {
 			senderAvatar = data[0].sender.profile_image_url;
 			data.forEach(msg => {
@@ -134,7 +135,8 @@ app.use((req, res, next) => {
 	//Get 3 most recently recieved DMs
 	T.get('direct_messages', { count: 3}, (err, data, res) => {
 		if(err) {
-			console.log(err.message);
+			const err = new Error('Whoops! Something went wrong!');
+			err.status = 500;
 		} else {
 			reciever = data[0].sender.name;
 			recieverAvatar = data[0].sender.profile_image_url;
@@ -150,12 +152,14 @@ app.use((req, res, next) => {
 	//Get current user's info
 	T.get('account/verify_credentials', (err, data, res) => {
 		if(err) {
-			console.log(err.message);
+			const err = new Error('Whoops! Something went wrong!');
+			err.status = 500;
+		} else {
+			currentUser = data.screen_name;
+			userAvatar = data.profile_image_url;
+			userFollowing = data.friends_count;
+			userBanner = data.profile_background_image_url;
 		}
-		currentUser = data.screen_name;
-		userAvatar = data.profile_image_url;
-		userFollowing = data.friends_count;
-		userBanner = data.profile_background_image_url;
 	});
 	next();
 });
@@ -188,21 +192,35 @@ app.get('/', (req, res) => {
 	});
 });
 
+//Render the template
 app.get('/', (req, res) => {
 	res.render('index');
 });
 
 //POST route for new tweets
 app.post('/', (req, res, next) => {
-	console.log(req.body);
-	T.post('statuses/update', { status: req.body.newTweet}, (err, data, res) => {
+	T.post('statuses/pdate', { status: req.body.newTweet}, (err, data, res) => {
 		if(err) {
-			console.log("There was an error");
+			const err = new Error('Whoops! Your tweet did not upload!');
+			err.status = 500;
 		} else {
 			console.log("Success!");
+			res.redirect('/');
+
 		}
 	})
 	next();
+});
+
+//Handle errors
+app.use((req, res, next) => {
+	const err = new Error('Not Found');
+	err.status = 404;
+	next(err);
+});
+
+app.use((err, req, res, next) => {
+	res.render('error', err);
 });
 
 app.listen(3000, () => {
