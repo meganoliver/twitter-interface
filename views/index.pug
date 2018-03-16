@@ -7,10 +7,10 @@ block content
       .circle--fluid
         .circle--fluid--cell.circle--fluid--primary.align-bottom.app--tweet--post
           .app--avatar(style=`background-image: url(${userAvatar})`)
-          textarea#tweet-textarea.circle--textarea--input(type="text" placeholder="What's happening?" name="newTweet")
+          textarea#tweet-textarea.circle--textarea--input(placeholder="What's happening?" name="newTweet")
           strong#tweet-char.app--tweet--char 140
         .circle--fluid--cell.align-bottom
-          button#postTweet.button-primary Tweet
+          button#postTweet.button-primary(type="submit") Tweet
   .bounds.app--body
     .app--section--header
       .grid-33

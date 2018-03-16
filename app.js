@@ -7,6 +7,7 @@ const pug = require('pug');
 const Twit = require('twit');
 const config = require('./config.js');
 const bodyParser = require('body-parser');
+const cookie = require('cookie-parser');
 
 
 const app = express();
@@ -14,19 +15,22 @@ const T = new Twit(config);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cookie());
 app.set('view engine', 'pug');
 
 //==========================
 //		GLOBAL VARIABLES
 //==========================
-let currentUser;
+let currentUserHandle;
+let currentUserName;
 let userAvatar;
 let userFollowing;
 let userBanner;
 let text = [];
-let tweeterName = [];
-let tweeterScreenName = [];
-let tweeterProfileImage = [];
+let newTweet;
+let tweeterName;
+let tweeterScreenName;
+let tweeterProfileImage;
 let retweetCount = [];
 let favoriteCount = [];
 let time;
@@ -79,19 +83,16 @@ app.use('/static', express.static('public'));
 
 //Pull data from the Twitter API 
 app.use((req, res, next) => {
+	newTweet = req.cookies.newTweet;
 	//Get 5 latest tweets
 		T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
 			if(err) {
-				const err = new Error('Whoops! Something went wrong!');
-				err.status = 500;
+				console.log("timeline error");
 			} else {
 				data.forEach(tweet => {
 					time = tweet.created_at;
 					tweetTime.push(elapsedTime(time));
 					text.push(tweet.text);
-					tweeterName.push(tweet.user.name);
-					tweeterScreenName.push(tweet.user.screen_name);
-					tweeterProfileImage.push(tweet.user.profile_image_url);
 					retweetCount.push(tweet.retweet_count);
 					favoriteCount.push(tweet.favorite_count);
 				})
@@ -102,8 +103,11 @@ app.use((req, res, next) => {
 	//Get 5 most recent friends
 	T.get('friends/list', { count: 5 }, (err, data, res) => {
 		if(err) {
-			const err = new Error('Whoops! Something went wrong!');
-			err.status = 500;
+			const error = {
+				message: err.message,
+				status: err.statusCode
+			}
+			
 		} else {
 			const { users } = data;
 			users.forEach(user => {
@@ -119,8 +123,7 @@ app.use((req, res, next) => {
 	//Get 3 most recent sent DMs
 	T.get('direct_messages/sent', { count: 3 }, (err, data, res) => {
 		if(err) {
-			const err = new Error('Whoops! Something went wrong!');
-			err.status = 500;
+			console.log("DM sent error");
 		} else {
 			senderAvatar = data[0].sender.profile_image_url;
 			data.forEach(msg => {
@@ -133,10 +136,9 @@ app.use((req, res, next) => {
 	next();
 }, (req, res, next) => {
 	//Get 3 most recently recieved DMs
-	T.get('direct_messages', { count: 3}, (err, data, res) => {
+	T.get('direct_messages', { count: 3 }, (err, data, res) => {
 		if(err) {
-			const err = new Error('Whoops! Something went wrong!');
-			err.status = 500;
+			console.log("DM recieving error");
 		} else {
 			reciever = data[0].sender.name;
 			recieverAvatar = data[0].sender.profile_image_url;
@@ -152,10 +154,10 @@ app.use((req, res, next) => {
 	//Get current user's info
 	T.get('account/verify_credentials', (err, data, res) => {
 		if(err) {
-			const err = new Error('Whoops! Something went wrong!');
-			err.status = 500;
+			console.log("Credentials error");
 		} else {
-			currentUser = data.screen_name;
+			currentUserHandle = data.screen_name;
+			currentUserName = data.name;
 			userAvatar = data.profile_image_url;
 			userFollowing = data.friends_count;
 			userBanner = data.profile_background_image_url;
@@ -167,11 +169,13 @@ app.use((req, res, next) => {
 //Create local variables to insert into templates
 app.get('/', (req, res) => {
 	res.render('index', {
-		currentUser: currentUser,
+		currentUserHandle: currentUserHandle,
+		currentUserName: currentUserName,
 		userAvatar: userAvatar,
 		userFollowing: userFollowing,
 		userBanner: userBanner,
 		text: text,
+		newTweet: newTweet,
 		tweeterName: tweeterName,
 		tweeterScreenName: tweeterScreenName,
 		tweeterProfileImage: tweeterProfileImage,
@@ -198,29 +202,31 @@ app.get('/', (req, res) => {
 });
 
 //POST route for new tweets
-app.post('/', (req, res, next) => {
-	T.post('statuses/pdate', { status: req.body.newTweet}, (err, data, res) => {
+app.post('/', (req, res) => {
+	res.cookie('newTweet', req.body.newTweet);
+	T.post('statuses/update', { status: req.body.newTweet}, (err, data, res) => {
 		if(err) {
-			const err = new Error('Whoops! Your tweet did not upload!');
-			err.status = 500;
+			console.log("Posting error");
 		} else {
-			console.log("Success!");
-			res.redirect('/');
-
+			newTweet = req.body.newTweet;
+			console.log("success!!");
 		}
-	})
-	next();
+	});
+	res.redirect('back');
 });
 
 //Handle errors
-app.use((req, res, next) => {
-	const err = new Error('Not Found');
-	err.status = 404;
-	next(err);
-});
 
 app.use((err, req, res, next) => {
-	res.render('error', err);
+	const error = {
+		message: err.message,
+		status: err.statusCode
+	}
+	res.render('error', error);
+});
+
+app.get('/error', (req, res) => {
+	res.render('error');
 });
 
 app.listen(3000, () => {

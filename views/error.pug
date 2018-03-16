@@ -2,4 +2,5 @@ extends layout
 
 block content
 	include includes/header.pug
-	h1= err
+	h1 `Whoops! Error code ${err.status}. ${err.message}.`
+	h2 Please try again later.
