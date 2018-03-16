@@ -203,7 +203,7 @@ app.get('/', (req, res) => {
 
 //POST route for new tweets
 app.post('/', (req, res) => {
-	res.cookie('newTweet', req.body.newTweet);
+	res.cookie('newTweet', req.body.newTweet, { expires: new Date(Date.now() + 600000) });
 	T.post('statuses/update', { status: req.body.newTweet}, (err, data, res) => {
 		if(err) {
 			console.log("Posting error");
