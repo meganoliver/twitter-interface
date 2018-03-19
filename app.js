@@ -8,6 +8,7 @@ const Twit = require('twit');
 const config = require('./config.js');
 const bodyParser = require('body-parser');
 const cookie = require('cookie-parser');
+const http = require('http');
 
 
 const app = express();
@@ -84,30 +85,29 @@ app.use('/static', express.static('public'));
 //Pull data from the Twitter API 
 app.use((req, res, next) => {
 	newTweet = req.cookies.newTweet;
+	const err = new Error("Sorry! There seems to be a problem.")
+
 	//Get 5 latest tweets
-		T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
-			if(err) {
-				console.log("timeline error");
-			} else {
-				data.forEach(tweet => {
-					time = tweet.created_at;
-					tweetTime.push(elapsedTime(time));
-					text.push(tweet.text);
-					retweetCount.push(tweet.retweet_count);
-					favoriteCount.push(tweet.favorite_count);
-				})
-			}
-		});	
+	T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
+		if(res.statusCode != 200) {
+			console.log("ERROR!!!");
+			next(err);
+		} else {
+			data.forEach(tweet => {
+				time = tweet.created_at;
+				tweetTime.push(elapsedTime(time));
+				text.push(tweet.text);
+				retweetCount.push(tweet.retweet_count);
+				favoriteCount.push(tweet.favorite_count);
+			})
+		}
+	});	
 	next();
 }, (req, res, next) => {
 	//Get 5 most recent friends
 	T.get('friends/list', { count: 5 }, (err, data, res) => {
 		if(err) {
-			const error = {
-				message: err.message,
-				status: err.statusCode
-			}
-			
+			next(err);
 		} else {
 			const { users } = data;
 			users.forEach(user => {
@@ -166,7 +166,7 @@ app.use((req, res, next) => {
 	next();
 });
 
-//Create local variables to insert into templates
+//Render the template and create local variables to insert into templates
 app.get('/', (req, res) => {
 	res.render('index', {
 		currentUserHandle: currentUserHandle,
@@ -196,39 +196,34 @@ app.get('/', (req, res) => {
 	});
 });
 
-//Render the template
-app.get('/', (req, res) => {
-	res.render('index');
-});
-
 //POST route for new tweets
 app.post('/', (req, res) => {
 	res.cookie('newTweet', req.body.newTweet, { expires: new Date(Date.now() + 600000) });
 	T.post('statuses/update', { status: req.body.newTweet}, (err, data, res) => {
 		if(err) {
-			console.log("Posting error");
+			return next(err);
 		} else {
 			newTweet = req.body.newTweet;
 			console.log("success!!");
 		}
 	});
-	res.redirect('back');
+	return res.redirect('back');
 });
 
 //Handle errors
 
-app.use((err, req, res, next) => {
-	const error = {
-		message: err.message,
-		status: err.statusCode
-	}
-	res.render('error', error);
+app.use((req, res, next) => {
+	const err = new Error('Page Not Found');
+	err.statusCode = 404;
+	next(err);
 });
 
-app.get('/error', (req, res) => {
+app.use((err, req, res, next) => {
+	res.locals.err = err;
+	res.status(err.statusCode);
 	res.render('error');
 });
 
 app.listen(3000, () => {
-	console.log('The app is running on localhost:3000!')
+	console.log('The app is running on localhost:3000!');
 });
