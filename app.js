@@ -85,12 +85,11 @@ app.use('/static', express.static('public'));
 //Pull data from the Twitter API 
 app.use((req, res, next) => {
 	newTweet = req.cookies.newTweet;
-	const err = new Error("Sorry! There seems to be a problem.")
-
 	//Get 5 latest tweets
 	T.get('statuses/user_timeline', { count: 5 }, (err, data, res) => {
-		if(res.statusCode != 200) {
-			console.log("ERROR!!!");
+		userBanner = data[0].user.profile_banner_url;
+		//userBanner = data.user.profile_banner_url;
+		if(err) {
 			next(err);
 		} else {
 			data.forEach(tweet => {
@@ -123,7 +122,7 @@ app.use((req, res, next) => {
 	//Get 3 most recent sent DMs
 	T.get('direct_messages/sent', { count: 3 }, (err, data, res) => {
 		if(err) {
-			console.log("DM sent error");
+			return next(err);
 		} else {
 			senderAvatar = data[0].sender.profile_image_url;
 			data.forEach(msg => {
@@ -138,7 +137,7 @@ app.use((req, res, next) => {
 	//Get 3 most recently recieved DMs
 	T.get('direct_messages', { count: 3 }, (err, data, res) => {
 		if(err) {
-			console.log("DM recieving error");
+			return next(err);
 		} else {
 			reciever = data[0].sender.name;
 			recieverAvatar = data[0].sender.profile_image_url;
@@ -154,13 +153,12 @@ app.use((req, res, next) => {
 	//Get current user's info
 	T.get('account/verify_credentials', (err, data, res) => {
 		if(err) {
-			console.log("Credentials error");
+			return next(err);
 		} else {
 			currentUserHandle = data.screen_name;
 			currentUserName = data.name;
 			userAvatar = data.profile_image_url;
 			userFollowing = data.friends_count;
-			userBanner = data.profile_background_image_url;
 		}
 	});
 	next();
@@ -211,7 +209,6 @@ app.post('/', (req, res) => {
 });
 
 //Handle errors
-
 app.use((req, res, next) => {
 	const err = new Error('Page Not Found');
 	err.statusCode = 404;
